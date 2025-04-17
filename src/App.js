@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react"
 
-const API_BASE = "https://m2fptvl5ai.execute-api.us-east-1.amazonaws.com" // replace with your real API URL
+const API_BASE = "https://m2fptvl5ai.execute-api.us-east-1.amazonaws.com"
 
 function App() {
   const [events, setEvents] = useState([])

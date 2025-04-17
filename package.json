@@ -2,7 +2,7 @@
   "name": "countdown-app",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://mandy-michel.github.io/countdown-app",
+  "homepage": "https://mandymichel.github.io/countdown-app",
   "dependencies": {
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
