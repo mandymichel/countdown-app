@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react"
+import { withAuthenticator } from "@aws-amplify/ui-react"
+import { fetchAuthSession } from "aws-amplify/auth"
 
 const API_BASE = "https://m2fptvl5ai.execute-api.us-east-1.amazonaws.com"
 
@@ -39,30 +41,51 @@ function App() {
 
   const getRandomColor = () => COLORS[Math.floor(Math.random() * COLORS.length)]
 
+  const getAuthHeaders = async () => {
+    const session = await fetchAuthSession()
+    const idToken = session.tokens?.idToken?.toString()
+
+    if (!idToken) {
+      throw new Error("No ID token found. User may not be authenticated.")
+    }
+
+    return {
+      Authorization: `Bearer ${idToken}`,
+      "Content-Type": "application/json",
+    }
+  }
+
   // Fetch events on load
   useEffect(() => {
-    fetch(`${API_BASE}/events`)
-      .then((res) => res.json())
-      .then((data) => {
+    const fetchEvents = async () => {
+      try {
+        const headers = await getAuthHeaders()
+        const res = await fetch(`${API_BASE}/events`, { headers })
+        const data = await res.json()
         setEvents(data)
         setLoading(false)
-      })
-      .catch((err) => console.error("Fetch error:", err))
+      } catch (err) {
+        console.error("Fetch error:", err)
+      }
+    }
+
+    fetchEvents()
   }, [])
 
   const handleAdd = async () => {
     if (!eventName || !eventDate) return
 
+    const headers = await getAuthHeaders()
+
     const res = await fetch(`${API_BASE}/events`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers,
       body: JSON.stringify({ eventName, eventDate }),
     })
 
     if (res.ok) {
-      // Refresh events
-      const updated = await fetch(`${API_BASE}/events`).then((res) =>
-        res.json()
+      const updated = await fetch(`${API_BASE}/events`, { headers }).then(
+        (res) => res.json()
       )
       setEvents(updated)
       setEventName("")
@@ -73,8 +96,11 @@ function App() {
   }
 
   const handleDelete = async (id) => {
+    const headers = await getAuthHeaders()
+
     const res = await fetch(`${API_BASE}/events/${id}`, {
       method: "DELETE",
+      headers,
     })
 
     if (res.ok) {
@@ -217,4 +243,4 @@ function App() {
   )
 }
 
-export default App
+export default withAuthenticator(App)
