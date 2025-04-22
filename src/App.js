@@ -1,8 +1,40 @@
 import React, { useState, useEffect } from "react"
-import { withAuthenticator } from "@aws-amplify/ui-react"
+import {
+  withAuthenticator,
+  Authenticator,
+  ThemeProvider,
+  defaultTheme,
+} from "@aws-amplify/ui-react"
 import { fetchAuthSession } from "aws-amplify/auth"
 
 const API_BASE = "https://m2fptvl5ai.execute-api.us-east-1.amazonaws.com"
+
+const customTheme = {
+  ...defaultTheme,
+  name: "custom-theme",
+  tokens: {
+    colors: {
+      brand: {
+        primary: {
+          10: "#f0f9ff",
+          80: "#0ea5e9", // change this to match your brand color
+          90: "#0284c7",
+        },
+      },
+    },
+    components: {
+      button: {
+        primary: {
+          backgroundColor: "{colors.brand.primary.80}",
+          color: "{colors.white}",
+          _hover: {
+            backgroundColor: "{colors.brand.primary.90}",
+          },
+        },
+      },
+    },
+  },
+}
 
 function App() {
   const [events, setEvents] = useState([])
@@ -111,135 +143,139 @@ function App() {
   }
 
   return (
-    <div
-      style={{
-        padding: "2rem",
-        maxWidth: 600,
-        margin: "0 auto",
-        fontFamily: "sans-serif",
-      }}
-    >
-      <h1>📅 Countdown App</h1>
-
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: "0.5rem",
-          marginBottom: "1.5rem",
-        }}
-      >
-        <input
-          type="text"
-          placeholder="Event Name"
-          value={eventName}
-          onChange={(e) => setEventName(e.target.value)}
+    <ThemeProvider theme={customTheme}>
+      <Authenticator>
+        <div
           style={{
-            flex: "1 1 200px",
-            padding: "0.5rem",
-            borderRadius: "5px",
-            border: "1px solid #ccc",
-            fontSize: "1rem",
-          }}
-        />
-        <input
-          type="date"
-          value={eventDate}
-          onChange={(e) => setEventDate(e.target.value)}
-          style={{
-            flex: "1 1 150px",
-            padding: "0.5rem",
-            borderRadius: "5px",
-            border: "1px solid #ccc",
-            fontSize: "1rem",
-          }}
-        />
-        <button
-          onClick={handleAdd}
-          style={{
-            backgroundColor: "#007bff",
-            color: "#fff",
-            border: "none",
-            padding: "0.5rem 1rem",
-            borderRadius: "5px",
-            cursor: "pointer",
-            fontWeight: "bold",
-            fontSize: "1rem",
-            flex: "0 0 auto",
+            padding: "2rem",
+            maxWidth: 600,
+            margin: "0 auto",
+            fontFamily: "sans-serif",
           }}
         >
-          Add
-        </button>
-      </div>
+          <h1>📅 Countdown App</h1>
 
-      <h2>Upcoming Events</h2>
-      {loading ? (
-        <p>Loading events...</p>
-      ) : events.length === 0 ? (
-        <p>No events yet!</p>
-      ) : (
-        <>
-          {events.map((event) => {
-            const [year, month, day] = event.eventDate.split("-")
-            const formattedDate = new Date(
-              year,
-              month - 1,
-              day
-            ).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: "0.5rem",
+              marginBottom: "1.5rem",
+            }}
+          >
+            <input
+              type="text"
+              placeholder="Event Name"
+              value={eventName}
+              onChange={(e) => setEventName(e.target.value)}
+              style={{
+                flex: "1 1 200px",
+                padding: "0.5rem",
+                borderRadius: "5px",
+                border: "1px solid #ccc",
+                fontSize: "1rem",
+              }}
+            />
+            <input
+              type="date"
+              value={eventDate}
+              onChange={(e) => setEventDate(e.target.value)}
+              style={{
+                flex: "1 1 150px",
+                padding: "0.5rem",
+                borderRadius: "5px",
+                border: "1px solid #ccc",
+                fontSize: "1rem",
+              }}
+            />
+            <button
+              onClick={handleAdd}
+              style={{
+                backgroundColor: "#007bff",
+                color: "#fff",
+                border: "none",
+                padding: "0.5rem 1rem",
+                borderRadius: "5px",
+                cursor: "pointer",
+                fontWeight: "bold",
+                fontSize: "1rem",
+                flex: "0 0 auto",
+              }}
+            >
+              Add
+            </button>
+          </div>
 
-            const emoji = getEmojiForEvent(event.eventName)
-            const bgColor = getRandomColor()
+          <h2>Upcoming Events</h2>
+          {loading ? (
+            <p>Loading events...</p>
+          ) : events.length === 0 ? (
+            <p>No events yet!</p>
+          ) : (
+            <>
+              {events.map((event) => {
+                const [year, month, day] = event.eventDate.split("-")
+                const formattedDate = new Date(
+                  year,
+                  month - 1,
+                  day
+                ).toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })
 
-            return (
-              <div
-                key={event.eventId}
-                style={{
-                  backgroundColor: bgColor,
-                  color: "#fff",
-                  borderRadius: "10px",
-                  padding: "1rem",
-                  marginBottom: "1rem",
-                  boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
-                  transition: "0.3s all ease",
-                }}
-              >
-                <h2 style={{ margin: 0 }}>
-                  {emoji} {event.eventName}
-                </h2>
-                <p style={{ margin: "0.5rem 0" }}>{formattedDate}</p>
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <p style={{ margin: 0 }}>{event.daysLeft} days left</p>
-                  <button
-                    onClick={() => handleDelete(event.eventId)}
+                const emoji = getEmojiForEvent(event.eventName)
+                const bgColor = getRandomColor()
+
+                return (
+                  <div
+                    key={event.eventId}
                     style={{
-                      backgroundColor: "#fff",
-                      color: bgColor,
-                      border: "none",
-                      padding: "0.4rem 0.8rem",
-                      borderRadius: "5px",
-                      cursor: "pointer",
-                      fontWeight: "bold",
+                      backgroundColor: bgColor,
+                      color: "#fff",
+                      borderRadius: "10px",
+                      padding: "1rem",
+                      marginBottom: "1rem",
+                      boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+                      transition: "0.3s all ease",
                     }}
                   >
-                    Delete
-                  </button>
-                </div>
-              </div>
-            )
-          })}
-        </>
-      )}
-    </div>
+                    <h2 style={{ margin: 0 }}>
+                      {emoji} {event.eventName}
+                    </h2>
+                    <p style={{ margin: "0.5rem 0" }}>{formattedDate}</p>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                      }}
+                    >
+                      <p style={{ margin: 0 }}>{event.daysLeft} days left</p>
+                      <button
+                        onClick={() => handleDelete(event.eventId)}
+                        style={{
+                          backgroundColor: "#fff",
+                          color: bgColor,
+                          border: "none",
+                          padding: "0.4rem 0.8rem",
+                          borderRadius: "5px",
+                          cursor: "pointer",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                )
+              })}
+            </>
+          )}
+        </div>
+      </Authenticator>
+    </ThemeProvider>
   )
 }
 
